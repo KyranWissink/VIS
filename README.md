@@ -1,4 +1,4 @@
-# HVSpy
+# HVISpy
 HGVS variant interpretation using SPLICEAI<br>
 <br>
 <br>
