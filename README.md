@@ -1,5 +1,5 @@
 # VIpy
-Variant interpretation using SPLICEAI<br>
+HGVS variant interpretation using SPLICEAI<br>
 <br>
 <br>
 <br>
