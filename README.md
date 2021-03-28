@@ -1,4 +1,4 @@
-# VIpy
+# HVSpy
 HGVS variant interpretation using SPLICEAI<br>
 <br>
 <br>
