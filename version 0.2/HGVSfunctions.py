@@ -37,21 +37,26 @@ def initialise(content, genome):
     return content, genome, grch
 
 def validateVariants(content):
-    with open ("input\preferred_transcript.txt") as ifs:
-        preferred = ifs.readlines()
-    preferred = [variant.strip() for variant in preferred]
     
-    # Get all the right transcripts
-    for index in range(0,len(content)):
-        match = re.search("(\w+)\.\d+(.*)", content[index])
-        nm = match.group(1)
-        rest = match.group(2)
-        transcript = [x for x in preferred if nm in x]
-        if len(transcript) == 1:
-            transcript = transcript[0]
-            content[index] = transcript + rest
-        else:
-            transcript = content[index]
+    try:
+        with open ("input\preferred_transcript.txt") as ifs:
+            preferred = ifs.readlines()
+        preferred = [variant.strip() for variant in preferred]
+
+        # Get all the right transcripts
+        for index in range(0,len(content)):
+            match = re.search("(\w+)\.\d+(.*)", content[index])
+            nm = match.group(1)
+            rest = match.group(2)
+            transcript = [x for x in preferred if nm in x]
+            if len(transcript) == 1:
+                transcript = transcript[0]
+                content[index] = transcript + rest
+            else:
+                transcript = content[index]
+                
+    except FileNotFoundError:
+        return content
     return content
 
 
