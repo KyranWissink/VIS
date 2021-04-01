@@ -1,8 +1,8 @@
 # Version 0.3 of VIpy<Br>
 
-**Command line arguments**
-arg1: variants in txt file
-arg2: hg19 OR hg38
+**Command line arguments**<br>
+arg1: variants in txt file<br>
+arg2: hg19 OR hg38<br>
 
 This version does **NOT** requires pyVEP
 **Required file structure**<br>
