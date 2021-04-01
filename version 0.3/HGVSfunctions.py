@@ -212,7 +212,6 @@ def getEnsembl(var):
     
     # Output of ENSEMBL is a big json file
     var.transcripts = transcripts.json()["Transcript"]
-    print(var.transcripts)
     
 
 
@@ -320,7 +319,6 @@ def getSpliceAI(var):
         spliceaigrch = "hg=38"
         
     url = 'https://spliceailookup-api.broadinstitute.org/spliceai/?' + spliceaigrch + '&variant=' + var.genomic
-    print(url)
     
     # Pull data from API and format it into a list
     r = requests.get(url, timeout=30)
@@ -610,7 +608,6 @@ class predicter(object):
         self.genome = genome
         self.grch = grch
         getGenomic(self)
-        print(self.genomic)
         getSpliceAI(self)
         getEnsembl(self)
         #validateTranscripts(self)
