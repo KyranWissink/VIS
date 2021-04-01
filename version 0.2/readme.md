@@ -1,7 +1,7 @@
 # Version 0.2 of VIpy<Br>
 
+This version requires pyVEP: https://github.com/kantale/pyVEP<br>
 **Required file structure**<br>
-This version includes pyVEP<br>
 Some files are required for the script to work:<br>
 
 input<br>
