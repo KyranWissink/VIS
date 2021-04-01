@@ -55,7 +55,7 @@ def run(content):
                 ofs.write(results)
 
             except Exception:
-                ofs.write(variant + "," + "ERROR")
+                ofs.write(variant + "," + "ERROR" + "\n")
 
 
 if __name__ == '__main__':
