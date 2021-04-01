@@ -1,12 +1,12 @@
-# Version 0.2 of VIpy
+# Version 0.2 of VIpy<Br>
 
-**Required file structure**
-This version includes pyVEP
-Some files are required for the script to work:
+**Required file structure**<br>
+This version includes pyVEP<br>
+Some files are required for the script to work:<br>
 
-input
-  |- hg37.fa or hg38.fa (genome fasta)
-  |- variants.txt (txt of hgvs variants separated by newlines)
-  |- preferred_transcripts.txt (OPTIONAL text file of preferred transcripts for NM numbers)
+input<br>
+  |- hg37.fa or hg38.fa (genome fasta)<br>
+  |- variants.txt (txt of hgvs variants separated by newlines)<br>
+  |- preferred_transcripts.txt (OPTIONAL text file of preferred transcripts for NM numbers)<br><br>
   
 Script was tested using hg38; if hg37 does not work, that is probably why.
