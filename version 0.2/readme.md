@@ -4,7 +4,7 @@ This version requires pyVEP: https://github.com/kantale/pyVEP<br>
 **Required file structure**<br>
 Some files are required for the script to work:<br>
 
-input<br>
+input (folder name)<br>
   |- hg37.fa or hg38.fa (genome fasta)<br>
   |- variants.txt (txt of hgvs variants separated by newlines)<br>
   |- preferred_transcripts.txt (OPTIONAL text file of preferred transcripts for NM numbers)<br><br>
