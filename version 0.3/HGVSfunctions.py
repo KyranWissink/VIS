@@ -38,21 +38,27 @@ def initialise(content, genome):
 
 # Get preferred transcripts for all variants
 def validateVariants(content):
-    with open ("input/preferred_transcript.txt") as ifs:
-        preferred = ifs.readlines()
-    preferred = [variant.strip() for variant in preferred]
     
-    # Verify transcripts
-    for index in range(0,len(content)):
-        match = re.search("(\w+)\.\d+(.*)", content[index])
-        nm = match.group(1)
-        rest = match.group(2)
-        transcript = [x for x in preferred if nm in x]
-        if len(transcript) == 1:
-            transcript = transcript[0]
-            content[index] = transcript + rest
-        else:
-            transcript = content[index]
+    try:
+        with open ("input/preferred_transcript.txt") as ifs:
+            preferred = ifs.readlines()
+        preferred = [variant.strip() for variant in preferred]
+        
+        # Verify transcripts
+        for index in range(0,len(content)):
+            match = re.search("(\w+)\.\d+(.*)", content[index])
+            nm = match.group(1)
+            rest = match.group(2)
+            transcript = [x for x in preferred if nm in x]
+            if len(transcript) == 1:
+                transcript = transcript[0]
+                content[index] = transcript + rest
+            else:
+                transcript = content[index]
+                
+    # Just return content when there are no preferred transcripts
+    except FileNotFoundError:
+        return content
     return content
 
 
@@ -60,7 +66,7 @@ def validateVariants(content):
 def getGenome(genome):
     if '19' in genome or '37' in genome:
         grch = "GRCh37"
-        genome = Fasta('input/hg37.fa')
+        genome = Fasta('input/hg19.fa')
     elif '38' in genome:
         grch = "GRCh38"
         genome = Fasta('input/hg38.fa')
@@ -188,9 +194,16 @@ def snvGenomic(var, var_g):
 # Gets all transcripts of the gene from ENSEMBL using the REST API
 def getEnsembl(var):
     # Define server and query
-    server = "http://rest.ensembl.org"
-    ext = "/lookup/symbol/homo_sapiens/" + var.gene +  "?expand=1"
-    transcripts = requests.get(server+ext, headers={"Content-Type" : "application/json"}, timeout=10)
+    if "38" in var.grch:
+        server = "http://rest.ensembl.org"
+        ext = "/lookup/symbol/homo_sapiens/" + var.gene +  "?expand=1"
+        transcripts = requests.get(server+ext, headers={"Content-Type" : "application/json"}, timeout=10)
+    else:
+        server = "http://grch37.rest.ensembl.org"
+        ext = "/lookup/symbol/homo_sapiens/" + var.gene + "?content-type=application/json;expand=1"
+        transcripts = requests.get(server+ext, timeout=10)
+        
+
     
     # Outputs an error and quits if the API is down
     if not transcripts.ok:
@@ -199,6 +212,7 @@ def getEnsembl(var):
     
     # Output of ENSEMBL is a big json file
     var.transcripts = transcripts.json()["Transcript"]
+    print(var.transcripts)
     
 
 
@@ -300,7 +314,13 @@ def locationFinder(transcript, pos):
 def getSpliceAI(var):
 
     # Define the url
-    url = 'https://spliceailookup-api.broadinstitute.org/spliceai/?hg=38&variant=' + var.genomic
+    if "37" in var.grch:
+        spliceaigrch = "hg=37"
+    else:
+        spliceaigrch = "hg=38"
+        
+    url = 'https://spliceailookup-api.broadinstitute.org/spliceai/?' + spliceaigrch + '&variant=' + var.genomic
+    print(url)
     
     # Pull data from API and format it into a list
     r = requests.get(url, timeout=30)
@@ -337,7 +357,6 @@ def getSpliceAI(var):
         "donor_gain": int(data[7]),
         "donor_loss": int(data[8])
         }           
-
 
 
 
@@ -591,6 +610,7 @@ class predicter(object):
         self.genome = genome
         self.grch = grch
         getGenomic(self)
+        print(self.genomic)
         getSpliceAI(self)
         getEnsembl(self)
         #validateTranscripts(self)
