@@ -1,4 +1,4 @@
-# Version 0.2 of VIpy<Br>
+# Version 0.3 of VIpy<Br>
 
 This version does **NOT** requires pyVEP
 **Required file structure**<br>
