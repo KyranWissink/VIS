@@ -1,5 +1,9 @@
 # Version 0.2 of VIpy<Br>
 
+**Command line arguments**<br>
+arg1: variants in txt file<br>
+arg2: hg19 OR hg38<br>
+
 This version requires pyVEP: https://github.com/kantale/pyVEP<br>
 **Required file structure**<br>
 Some files are required for the script to work:<br>
