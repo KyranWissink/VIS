@@ -21,7 +21,7 @@ pip install pyensemblrest
 pip install pandas
 ```
 <br>
-### Usage
+### Usage<br>
 The script can be run directly from the command line:
 ```sh
 HGVSpredict.py -I <input file> -O <output file> -G <genome version> -P <Preferred transcripts (optional)>
