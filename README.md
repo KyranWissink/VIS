@@ -1,4 +1,5 @@
 ## VIS: HGVS variant interpretation using SPLICEAI
+Written and tested in Python 3.7.9.<br>
 This script allows direct HGVS mutation variant prediction using SpliceAI. 
 <br>
 This entire script is based on SpliceAI. The code can be found on their GitHub:<br>
