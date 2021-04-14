@@ -7,8 +7,8 @@ https://github.com/Illumina/SpliceAI
 
 ### Prerequisites
 This script requires genome annotation for the genome the user provides. These can be downloaded here:<br>
-hg38: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
-hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz
+hg38: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz<br>
+hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz<br>
 <br>
 <br>
 This script requires some dependencies to run. These can be found on their respective GitHub pages:<br>
