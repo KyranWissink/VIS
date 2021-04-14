@@ -12,10 +12,10 @@ hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz<br>
 <br>
 <br>
 This script requires some dependencies to run. These can be found on their respective GitHub pages:<br>
-https://github.com/biocommons/hgvs
-https://github.com/mdshw5/pyfaidx
-https://github.com/gawbul/pyEnsemblRest
-https://github.com/pandas-dev/pandas
+HGVS:         https://github.com/biocommons/hgvs<br>
+pyfaidx:      https://github.com/mdshw5/pyfaidx<br>
+Ensembl Rest: https://github.com/gawbul/pyEnsemblRest<br>
+Pandas:       https://github.com/pandas-dev/pandas<br>
 
 Alternatively, these can be installed directly via:
 ```sh
