@@ -23,7 +23,7 @@ Output: A .csv file with predictions of the effects of the mutations
 ####################################
 
 import sys, os
-import HGVSpredict as hf
+import spliceaifriendly as hf
 import pandas as pd
 import argparse
 
@@ -54,7 +54,7 @@ def check_arg(arg):
 
     """
     if not os.path.exists(arg):
-        raise FileNotFoundError ("File not found for %s." % arg)
+        raise FileNotFoundError ("File not found for: %s." % arg)
         sys.exit()
 
 

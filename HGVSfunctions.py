@@ -310,19 +310,19 @@ class Predicter():
     
         # dels
         if "del" in var["hgvs"]:
-            var["pos"], ref, alt = cls.delGenomic(var, cls.genome)
+            var["pos"], ref, alt = cls.del_genomic(var, cls.genome)
             
         # dups
         elif "dup" in var["hgvs"]:
-            var["pos"], ref, alt = cls.dupGenomic(var, cls.genome)
+            var["pos"], ref, alt = cls.dup_genomic(var, cls.genome)
             
         # ins
         elif "ins" in var["hgvs"]:
-            var["pos"], ref, alt = cls.insGenomic(var)
+            var["pos"], ref, alt = cls.ins_genomic(var)
             
         #SNV
         else:
-            var["pos"], ref, alt = cls.snvGenomic(var)
+            var["pos"], ref, alt = cls.snv_genomic(var)
             
         var["genomic"] = var["chrom"] + "-" + var["pos"] + "-" + ref + "-" + alt
             
@@ -331,7 +331,23 @@ class Predicter():
     
     
     @staticmethod
-    def delGenomic(var, genome):
+    def dup_genomic(var, genome):
+        positions = [var["vep"]["start"], var["vep"]["end"]]
+        start = min(positions)
+        end = max(positions)
+        ref = str(genome["chr" + str(var["chrom"])]\
+            [ start - 1]).upper() # get the ref 
+        alt = str(genome["chr" + str(var["chrom"])]\
+            [ start - 1: end]).upper()
+        
+        pos = str(start - 1)
+        
+        return pos, ref, alt
+    
+    
+    
+    @staticmethod
+    def del_genomic(var, genome):
         """
         Function
         --------
@@ -363,7 +379,7 @@ class Predicter():
     
     
     @classmethod
-    def snvGenomic(cls, var):
+    def snv_genomic(cls, var):
         """
         Function
         --------
