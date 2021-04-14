@@ -6,13 +6,13 @@ https://github.com/Illumina/SpliceAI
 <br>
 
 ### Prerequisites
-**Genome Annotation**
+**Genome Annotation**<br>
 This script requires genome annotation for the genome the user provides. These can be downloaded here:<br>
 hg38: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz<br>
 hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz<br>
 <br>
 <br>
-**Libraries**
+**Libraries**<br>
 This script requires some libraries to run. These can be found on their respective GitHub pages:<br>
 HGVS:         https://github.com/biocommons/hgvs<br>
 pyfaidx:      https://github.com/mdshw5/pyfaidx<br>
