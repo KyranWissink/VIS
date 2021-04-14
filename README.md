@@ -12,7 +12,7 @@ https://github.com/mdshw5/pyfaidx
 https://github.com/gawbul/pyEnsemblRest
 https://github.com/pandas-dev/pandas
 
-Alternatively, these can be installed directly via:<
+Alternatively, these can be installed directly via:
 ```sh
 pip install hgvs
 pip install pyfaidx
@@ -26,5 +26,18 @@ The script can be run directly from the command line:
 HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 ```
 
-![RUG logo](https://www.rug.nl/about-ug/practical-matters/huisstijl/huisstijl-basiselementen/images/rugr_logonl_rood_rgb-web.png)<br><br>
-**Kyran Wissink**<br>Student Biomedical Sciences<br>University of Groningen<br>github.com/KyranWissink<br>k.wissink@student.rug.nl
+### Code flow
+* Check arguments
+* Validate variants with preferred transcripts
+* Per-variant runs:
+* * Conversion from HGVS to genomic variant 
+* * Locating the mutation within the gene
+* * Get SpliceAI scores
+* * Predict transcript effect based on location and scores
+
+![RUG logo](https://www.rug.nl/about-ug/practical-matters/huisstijl/huisstijl-basiselementen/images/rugr_logonl_rood_rgb-web.png)
+**Kyran Wissink**
+Student Biomedical Sciences
+University of Groningen
+github.com/KyranWissink
+k.wissink@student.rug.nl
