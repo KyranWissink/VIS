@@ -332,6 +332,23 @@ class Predicter():
     
     @staticmethod
     def dup_genomic(var, genome):
+        """
+        Function
+        --------
+        Gets the genomic variant from the HGVS variant for dup variants.
+        
+        Parameters
+        ----------
+        var : Variant dict.
+        genome : The genome annotation Fasta.
+
+        Returns
+        -------
+        pos : Genomic position of the mutation.
+        ref : Ref at that genomic position.
+        alt : Alt that has occured due to the mutation.
+
+        """
         positions = [var["vep"]["start"], var["vep"]["end"]]
         start = min(positions)
         end = max(positions)
@@ -340,7 +357,7 @@ class Predicter():
         alt = str(genome["chr" + str(var["chrom"])]\
             [ start - 1: end]).upper()
         
-        pos = str(start - 1)
+        pos = str(start)
         
         return pos, ref, alt
     
