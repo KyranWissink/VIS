@@ -1,17 +1,17 @@
 ## VIpy: HGVS variant interpretation using SPLICEAI
 This script allows direct HGVS mutation variant prediction using SpliceAI. 
 <br>
-This entire script is based on SpliceAI. The code can be found on their GitHub:
+This entire script is based on SpliceAI. The code can be found on their GitHub:<br>
 https://github.com/Illumina/SpliceAI
 <br>
 
 ### Prerequisites
-This script requires genome annotation for the genome the user provides. These can be downloaded here:
+This script requires genome annotation for the genome the user provides. These can be downloaded here:<br>
 hg38: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
 hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz
 <br>
 <br>
-This script requires some dependencies to run. These can be found on their respective GitHub pages:
+This script requires some dependencies to run. These can be found on their respective GitHub pages:<br>
 https://github.com/biocommons/hgvs
 https://github.com/mdshw5/pyfaidx
 https://github.com/gawbul/pyEnsemblRest
