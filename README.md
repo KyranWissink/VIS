@@ -20,9 +20,10 @@ pip install pyfaidx
 pip install pyensemblrest
 pip install pandas
 ```
+
 <br>
-### Usage<br>
-The script can be run directly from the command line:
+### Usage
+The script can be run directly from the command line:<br>
 ```sh
 HGVSpredict.py -I <input file> -O <output file> -G <genome version> -P <Preferred transcripts (optional)>
 ```
