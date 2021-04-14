@@ -6,7 +6,6 @@ This script requires genome annotation for the genome the user provides. These c
 hg38: http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz<br>
 hg19: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz<br>
 <br>
-
 This script requires some dependencies to run. These can be found on their respective GitHub pages:<br>
 https://github.com/biocommons/hgvs<br>
 https://github.com/mdshw5/pyfaidx<br>
@@ -20,17 +19,12 @@ pip install pyfaidx
 pip install pyensemblrest
 pip install pandas
 ```
-
 <br>
 ### Usage
 The script can be run directly from the command line:<br>
 ```sh
 HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 ```
-
-
-
-
 <br>
 <br>
 <br>
