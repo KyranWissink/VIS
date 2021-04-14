@@ -28,7 +28,7 @@ pip install pandas
 ### Usage
 The script can be run directly from the command line:
 ```sh
-HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
+python3 HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 ```
 Input can be any regular text format readable by python 3.7.9 (.txt for example)<br>
 The output is in .csv format. It is therefore advised to put .csv in the output file name.<br>
