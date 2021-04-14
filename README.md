@@ -25,7 +25,7 @@ pip install pandas
 ### Usage
 The script can be run directly from the command line:<br>
 ```sh
-HGVSpredict.py -I <input file> -O <output file> -G <genome version> -P <Preferred transcripts (optional)>
+HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 ```
 
 
