@@ -39,6 +39,9 @@ HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 * * Locating the mutation within the gene
 * * Get SpliceAI scores
 * * Predict transcript effect based on location and scores
+<br>
+<br>
+<br>
 
 ![RUG logo](https://www.rug.nl/about-ug/practical-matters/huisstijl/huisstijl-basiselementen/images/rugr_logonl_rood_rgb-web.png)<br>
 Kyran Wissink
