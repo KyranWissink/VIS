@@ -32,7 +32,7 @@ The script can be run directly from the command line:
 ```sh
 python3 HGVSpredict.py -I input -O output -G genome -P preferred_transcript (optional)
 ```
-Input can be any regular text format readable by python 3.7.9 (.txt for example)<br>
+Input can be any regular text format readable by python 3.7.9 (.txt for example), with variants separated by newline characters. Encoding does not matter.<br>
 The output is in .csv format. It is therefore advised to put .csv in the output file name.<br>
 
 ### Code flow
