@@ -1,0 +1,5 @@
+HGVS,Gene,Chrom,Genomic,Location,80-100,50-80,20-50,05-20
+NM_001287.6:c.1617+6_1617+7delTG,CLCN7,16,16-1450489-CCA-C,intron 16,Exon 17 skip,Exon 17 7 bp del,-,-
+NM_015981.3:c.817-1G>A,CAMK2A,5,5-150250310-C-T,intron 10,Exon 11 skip,Exon 11 7 bp del,-,-
+NM_002340.5:c.1109+2T>C,LSS,21,21-46213736-A-G,intron 10,Exon 11 skip,Exon 11 7 bp del,-,-
+NM_014338.3:c.904-12_904-3delCTATCACCAC,PISD,22,22-31619838-TGTGGTGATAG-T,intron 7,Exon 8 skip,Exon 8 7 bp del,-,-
