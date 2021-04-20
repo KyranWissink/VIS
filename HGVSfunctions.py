@@ -846,7 +846,7 @@ class Predicter():
         else:
             effect = "ins"
         
-        # Forgot why intronic acceptor sites are the next exon
+        # Intronic acceptor mutations apply to the next exon
         if var["location"]["region"] == "intron" and site == "acceptor":
             prediction = "Exon " + str(var["location"]["number"] + 1) + " " + \
                 str(abs(bp)) + " bp " + effect
@@ -924,7 +924,7 @@ class Predicter():
         else:
             effect = "ins"
         
-        # Forgot why intronic acceptor sites are the next exon
+        # Intronic acceptor mutations apply to the next exon
         if var["location"]["region"] == "intron" and site == "acceptor":
             prediction = "Exon " + str(var["location"]["number"] + 1) + " " + \
                 str(abs(bp)) + " bp " + effect
@@ -974,4 +974,3 @@ class Predicter():
             prediction = "Exon " + str(var["location"]["number"]) + " skip" 
             
         return prediction
-    
