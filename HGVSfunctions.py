@@ -86,7 +86,7 @@ def clean(var):
     output["80-100%"] = var["prediction"][0.8]
     output["50-80%"] = var["prediction"][0.5]
     output["20-50%"] = var["prediction"][0.2]
-    output["05-20%"] = var["prediction"][0.05]
+    output["5-20%"] = var["prediction"][0.05]
     
     return output
 
@@ -235,19 +235,50 @@ class Predicter():
         var = {}
         var["hgvs"] = variant
         
-        var["vep"] = ensRest.getVariantConsequencesByHGVSnotation\
-            (species="human", hgvs_notation=var["hgvs"])[0]
-            
-        var["gene"] = cls.get_gene(var["vep"]["transcript_consequences"])
-        var["chrom"] = var["vep"]["seq_region_name"]    
-            
-        var["lookup"] = ensRest.getLookupBySymbol\
-            (species="homo_sapiens", symbol=var["gene"], expand=1)
+        try:
+            var["vep"] = ensRest.getVariantConsequencesByHGVSnotation\
+                (species="human", hgvs_notation=var["hgvs"])[0]
+        except Exception as e:
+            print(e)
+            return var
         
-        var = cls.get_genomic(var)   
-        var["scores"], var["mrnapos"] = cls.get_spliceai(var["genomic"], cls.grch)
-        var["location"] = cls.get_location(var["lookup"]["Transcript"], var["pos"])
-        var["prediction"] = cls.get_predictions(var)
+        try:
+            var["gene"] = cls.get_gene(var["vep"]["transcript_consequences"])
+            var["chrom"] = var["vep"]["seq_region_name"]
+        except Exception as e:
+            print(e)
+            return var
+         
+        try:
+            var["lookup"] = ensRest.getLookupBySymbol\
+                (species="homo_sapiens", symbol=var["gene"], expand=1)
+        except Exception as e:
+            print(e)
+            return var
+        
+        try:
+            var = cls.get_genomic(var)
+        except Exception as e:
+            print(e)
+            return var
+        
+        try:
+            var["scores"], var["mrnapos"] = cls.get_spliceai(var["genomic"], cls.grch)
+        except Exception as e:
+            print(e)
+            return var
+            
+        try:
+            var["location"] = cls.get_location(var["lookup"]["Transcript"], var["pos"])
+        except Exception as e:
+            print(e)
+            return var
+        
+        try:
+            var["prediction"] = cls.get_predictions(var)
+        except Exception as e:
+            print(e)
+            return var
     
         return var
             
@@ -353,7 +384,7 @@ class Predicter():
         start = min(positions)
         end = max(positions)
         ref = str(genome["chr" + str(var["chrom"])]\
-            [ start - 1]).upper() # get the ref 
+            [ start - 1]).upper()
         alt = str(genome["chr" + str(var["chrom"])]\
             [ start - 1: end]).upper()
         
@@ -662,9 +693,189 @@ class Predicter():
         return predictions
     
     
+
+    @staticmethod
+    def gain(var, site):
+        """
+        Function
+        --------
+        This method predicts gain-type mutations: donor or acceptor gain.
+        Donor and acceptor gain mutation have a similar effect:either a small 
+        insertion or deletion. Donor sites are at the 5' end of exons, and 
+        acceptor sites at the 3' end. 
+        
+        Therefore, these mutations have the opposite effect of each other. 
+        When an acceptor gain occurs upstream of the normal acceptor site, this
+        will results in a deletion. But when a donor gain occurs upstream of 
+        the normal donor site, an insertion occurs. 
+        
+        For that reason, upstream donor gain and downstream acceptor gain have
+        the same effect on the transcript, as do downstream donor gain and 
+        upstream acceptor gain.
+        
+        Parameters
+        ----------
+        var : class of the variant.
+        site : site of the mutation; either donor or acceptor.
+
+        Returns
+        -------
+        prediction : effect prediction of the mutation.
+
+        """
+        
+        # Upstream
+        if var["location"]["region"] == "exon" and site == "acceptor" or\
+           var["location"]["region"] == "intron" and site == "donor":
+            
+            bp = var["mrnapos"]["acceptor_gain"] + var["location"]["start"] 
+         
+        # Downstream
+        else:
+            bp = var["mrnapos"]["acceptor_gain"] - var["location"]["start"] 
+        
+        # Upstream acceptor gain or downstream donor gain = del
+        if site == "acceptor" and bp > 0 or \
+           site == "donor" and bp < 0:
+            effect = "del"
+        
+        # Downstream acceptor gain and upstream donor gain = ins
+        else:
+            effect = "ins"
+        
+        # Forgot why intronic acceptor sites are the next exon
+        if var["location"]["region"] == "intron" and site == "acceptor":
+            prediction = "Exon " + str(var["location"]["number"] + 1) + " " + \
+                str(abs(bp)) + " bp " + effect
+            
+        else:
+            prediction = "Exon " + str(var["location"]["number"]) + " " + \
+                str(abs(bp)) + " bp " + effect
+            
+        return prediction
+    
+    
     
     @staticmethod
-    def predict(var, threshold):
+    def loss(var, site):
+        """
+        Function
+        --------
+        This method predict solo loss-type mutations: donor or acceptor loss.
+        Donor or acceptor loss mutations lead to exon skips. 
+
+        Parameters
+        ----------
+        var : class of the variant.
+        site : site of the mutation; either donor or acceptor.
+
+        Returns
+        -------
+        prediction : effect prediction of the mutation.
+
+        """
+        if var["location"]["region"] == "intron" and site == "acceptor":
+            prediction = "Exon " + str(var["location"]["number"] + 1) + " skip"
+            
+        else:
+            prediction = "Exon " + str(var["location"]["number"]) + " skip"
+        
+        return prediction
+    
+    
+    
+    @staticmethod
+    def gain_loss(var, site):
+        """
+        Function
+        --------
+        This method predicts gain+loss-type mutations.
+        Gain/loss-type mutations are very similar to gain mutations. They are
+        still seperated in another method for clarity and because the basepairs
+        are calculated differently.
+        
+        Parameters
+        ----------
+        var : class of the variant.
+        site : site of the mutation; either donor or acceptor.
+
+        Returns
+        -------
+        prediction : effect prediction of the mutation.
+
+        """
+
+        if site == "acceptor":
+            bp = var["mrnapos"]["acceptor_gain"] - var["mrnapos"]["acceptor_loss"]
+         
+
+        else:
+            bp = var["mrnapos"]["donor_gain"] - var["mrnapos"]["donor_loss"]
+        
+        # Upstream acceptor gain or downstream donor gain = del
+        if site == "acceptor" and bp > 0 or \
+           site == "donor" and bp < 0:
+            effect = "del"
+        
+        # Downstream acceptor gain and upstream donor gain = ins
+        else:
+            effect = "ins"
+        
+        # Forgot why intronic acceptor sites are the next exon
+        if var["location"]["region"] == "intron" and site == "acceptor":
+            prediction = "Exon " + str(var["location"]["number"] + 1) + " " + \
+                str(abs(bp)) + " bp " + effect
+            
+        else:
+            prediction = "Exon " + str(var["location"]["number"]) + " " + \
+                str(abs(bp)) + " bp " + effect
+            
+        return prediction
+    
+    
+    
+    @staticmethod
+    def loss_loss(var):
+        """
+        Function
+        --------
+        This method predicts double loss mutations; albeit unlikely to occur.
+        Double loss mutations can either lead to an exon skip, double exon skip
+        or intron retention, based on the location of the mutations.
+        
+
+        Parameters
+        ----------
+        var : class of the variant.
+        site : site of the mutation; either donor or acceptor.
+
+        Returns
+        -------
+        prediction : effect prediction of the mutation.
+
+        """
+
+         # Exon skip if donor loss is downstream (positive 3') of acceptor loss
+        if var["mrnapos"]["donor_loss"] > var["mrnapos"]["acceptor_loss"]:
+            prediction = "Exon " + str(var["location"]["number"]) + " skip"
+        
+        # Double exon skip or intron retention if donor loss is upstream (negative 5') of acceptor loss
+        elif var["mrnapos"]["donor_loss"] < var["mrnapos"]["acceptor_loss"]:
+            prediction = "Exon " + str(var["location"]["number"] - 1) + \
+                " & " + str(var["location"]["number"])  + " skip" + \
+                        " OR intron " + str(var["location"]["number"] - 1) + \
+                            " retention"
+                                    
+        # Exon skip if donor loss is downstream (positive 3')
+        else:
+            prediction = "Exon " + str(var["location"]["number"]) + " skip" 
+            
+        return prediction
+    
+    
+    
+    @classmethod
+    def predict(cls, var, threshold):
         """
         Function
         --------
@@ -691,212 +902,60 @@ class Predicter():
         
         
         
-        ####################################
-        #           Acceptor gain          #
-        ####################################
-        
+        # Acceptor gain
         if acc_gain >= threshold:
             
             # Acceptor gain alone
-            if acc_loss <= threshold and don_gain <= threshold and don_loss <= threshold:
+            if acc_loss < threshold and don_gain < threshold and don_loss < threshold:
+                prediction = cls.gain(var, "acceptor")
                 
-                # If the mutation is in an exon
-                if var["location"]["number"] == "exon":
-                    
-                    # acceptor sites are at the beginning of introns
-                    bp = var["mrnapos"]["acceptor_gain"] + var["location"]["start"] 
-                    
-                    # If the bp of the acceptor gain is before the start of the exon (negative because '5 )
-                    # That would lead to a partial insert
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp ins"
-                    
-                    # Acceptor gain inside the exon would result in a partial del
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp del"
-                        
-                # If the mutation is in an intron
-                else:
-                    bp = var["mrnapos"]["acceptor_gain"] - var["location"]["end"] # acceptor sites are at the end of introns
-                    
-                    # if the acceptor gain is in an intron; partial insertion
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"] + 1) + " " + str(abs(bp)) + " bp ins"
-                        
-                    # If the acceptor gain is in the exon; partial deletion
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"] + 1) + " " + str(bp) + " bp del"
-                        
             # Acceptor gain + loss
-            elif acc_loss >= threshold and don_gain <= threshold and don_loss <= threshold:
-    
-                # bp del or ins is based on how far acceptor gain is over loss
-                # negative is upstream
-                bp = var["mrnapos"]["acceptor_gain"] - var["mrnapos"]["acceptor_loss"]
-    
-                # If the mutation is in an exon
-                if var["location"]["number"] == "exon":
-    
-                    # upstream acceptor gain over loss means an insert
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp ins"
-                        
-                    # Downstream acceptor gain over loss means del
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp del"
-                        
-                # if the mutation is in an intron
-                else:
-    
-                    # upstream acceptor gain in intron extends the downstream exon
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"] + 1) + " " + str(abs(bp)) + " bp ins"
-                    # Downstream acceptor gain in intron dels the downstream exon
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"] + 1) + " " + str(bp) + " bp del"
-                        
+            if don_gain < threshold and don_loss < threshold:
+                prediction = cls.gain_loss(var, "acceptor")
+            
             # Acceptor gain + loss + donor loss/gain
             else:
                 prediction = "complex"
                         
-                        
-                        
-        ####################################
-        #           Acceptor loss          #
-        ####################################
-        
+                
+                
+        # Acceptor loss
         elif acc_loss >= threshold:
             
             # Acceptor loss alone
             if don_gain <= threshold and don_loss <= threshold:
                 
-                # If the mutation is in an exon that would be skipped
-                if var["location"]["number"] == "exon":
-                    prediction = "Exon " + str(var["location"]["number"]) + " skip"
-                        
-                # If the mutation is in an intron the exon after is skipped
-                else:
-                    prediction = "Exon " + str(var["location"]["number"] + 1) + " skip"
-            
+                prediction = cls.loss(var, "acceptor")
+
             # Acceptor loss + donor loss
             elif don_loss >= threshold and don_gain <= threshold:
-                
-                # Exon skip if donor loss is downstream (positive 3') of acceptor loss
-                if var["mrnapos"]["donor_loss"] > var["mrnapos"]["acceptor_loss"]:
-                    
-                    if var["location"]["number"] == "exon":
-                        prediction = "Exon " + str(var["location"]["number"]) + " skip"
-                        
-                    else:
-                        prediction = "Exon " + str(var["location"]["number"]) + " skip"
-                
-                # Double exon skip or intron retention if donor loss is upstream (negative 5') of acceptor loss
-                elif var["mrnapos"]["donor_loss"] < var["mrnapos"]["acceptor_loss"]:
-                    
-                    if var["location"]["number"] == "exon":
-                        prediction = "Exon " + str(var["location"]["number"] - 1) + " & " + str(var["location"]["number"])  + " skip" + \
-                                    " OR intron " + str(var["location"]["number"] - 1) + " retention"
-                    
-                    else:
-                        prediction = "Exon " + str(var["location"]["number"] - 1) + " & " + str(var["location"]["number"])  + " skip" + \
-                                    " OR intron " + str(var["location"]["number"] - 1) + " retention"
-                                    
-                # Exon skip if donor loss is downstream (positive 3')
-                else:
-                    
-                    if var["location"]["number"] == "exon":
-                        prediction = "Exon " + str(var["location"]["number"]) + " skip"
-                    else:
-                        prediction = "Exon " + str(var["location"]["number"]) + " skip"
-            
+                prediction = cls.loss_loss(var)
+
             # Acceptor loss + donor loss + donor gain
             else:
                 prediction = "complex"
     
     
     
-        ####################################
-        #             Donor gain           #
-        ####################################
-        
+        # Donor gain
         elif don_gain >= threshold:
             
             # Donor gain alone
-            if don_loss <= threshold:
+            if don_loss < threshold:
+                prediction = cls.gain(var, "donor")
                 
-                # If the mutation is in an exon
-                if var["location"]["number"] == "exon":
-                    
-                    # donor sites are at the end of introns
-                    bp = var["mrnapos"]["donor_gain"] - var["location"]["end"] 
-                    
-                    # If the bp of the donor gain is before the end of the exon (negative because '5 )
-                    # That would lead to a partial delete
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp del"
-                    
-                    # Donor gain inside the intron would result in a partial del
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp ins"
-                        
-                # If the mutation is in an intron
-                else:
-                    
-                    # donor sites are at the beginning of introns
-                    bp = abs(var["mrnapos"]["donor_gain"]) - abs(var["location"]["start"]) 
-                    
-                    # if the donor gain is in an intron
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp ins"
-                        
-                    # If the acceptor gain is in the exon
-                    if bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp del"
-                
-            # Donor gain + loss            
-            elif don_loss >= threshold:
-                
-                # bp del or ins is based on how far donor gain is over loss
-                # negative is upstream
-                bp = var["mrnapos"]["donor_gain"] - var["mrnapos"]["donor_loss"]
-                
-                # If the mutation is in an exon
-                if var["location"]["number"] == "exon":
-                    
-                    # upstream donor gain over loss means del
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp del"
-                        
-                    # Downstream donor gain over loss means an insert
-                    elif bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp ins"
-                        
-                # if the mutation is in an intron
-                else:
-                    
-                    # upstream donor gain in intron dels the downstream exon
-                    if bp < 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(abs(bp)) + " bp del"
-                        
-                    # Downstream acceptor gain in intron extends the downstream exon
-                    elif bp > 0:
-                        prediction = "Exon " + str(var["location"]["number"]) + " " + str(bp) + " bp ins"
-            
-            
-                
-        ####################################
-        #             Donor loss           #
-        ####################################
-        
-        elif don_loss >= threshold:
-            # Donor loss alone
-            # If the mutation is in an exon that would be skipped
-            if var["location"]["number"] == "exon":
-                prediction = "Exon " + str(var["location"]["number"]) + " skip"
-                    
-            # If the mutation is in an intron the exon before is skipped
+            # Donor gain + loss
             else:
-                prediction = "Exon " + str(var["location"]["number"]) + " skip"
+                prediction = cls.gain_loss(var, "donor")
+            
+                
+        # Donor loss
+        elif don_loss >= threshold:
+            
+            # Donor loss alone
+            prediction = cls.loss(var, "donor")
+        
+        
         
         return prediction
         
