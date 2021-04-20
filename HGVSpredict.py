@@ -41,6 +41,7 @@ parser.add_argument('-p', "--pref_tr", help='OPTIONAL preffered transcripts txt'
 args = parser.parse_args()
 
 
+
 def check_arg(arg):
     """
     Parameters
@@ -71,7 +72,6 @@ if __name__ == '__main__':
 
     # Check arguments
     check_arg(args.input)
-    check_arg(args.output)
     check_arg(args.genome)
     if args.pref_tr:
         check_arg(args.pref_tr)
@@ -99,15 +99,17 @@ if __name__ == '__main__':
     
     
     # Run every variant
-    try:
-        for variant in content:
-            print("Working on: " + variant + ".")
+    for variant in content:
+        print("Working on: " + variant + ".")
+        try:
             output = hf.Predicter.run(variant) # Predict
             output = hf.clean(output) # Do not include everything from the class
             write.append(output) # Add to final output
-    except Exception:
-        print("variant skipped: %s." % variant)
-    
+
+        except Exception:
+            print("variant skipped: %s." % variant)
+            output["prediction"] = "ERROR"
+            pass
     
     # Convert results to pandas dataframe
     write = pd.DataFrame(data=write)

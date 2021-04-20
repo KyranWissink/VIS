@@ -92,7 +92,7 @@ def clean(var):
 
 
 
-class Predicter():
+class Predicter:
     
     ##########################################################################
     #                               INITIALISATION                           #
@@ -127,7 +127,6 @@ class Predicter():
             
         else:
             raise RuntimeError("Invalid genome: " + grch + ".")
-            sys.exit()
             
         return genome, grch
     
@@ -238,47 +237,21 @@ class Predicter():
         try:
             var["vep"] = ensRest.getVariantConsequencesByHGVSnotation\
                 (species="human", hgvs_notation=var["hgvs"])[0]
-        except Exception as e:
-            print(e)
-            return var
-        
-        try:
+                
             var["gene"] = cls.get_gene(var["vep"]["transcript_consequences"])
             var["chrom"] = var["vep"]["seq_region_name"]
-        except Exception as e:
-            print(e)
-            return var
-         
-        try:
+            
             var["lookup"] = ensRest.getLookupBySymbol\
                 (species="homo_sapiens", symbol=var["gene"], expand=1)
-        except Exception as e:
-            print(e)
-            return var
-        
-        try:
+                
             var = cls.get_genomic(var)
-        except Exception as e:
-            print(e)
-            return var
-        
-        try:
-            var["scores"], var["mrnapos"] = cls.get_spliceai(var["genomic"], cls.grch)
-        except Exception as e:
-            print(e)
-            return var
             
-        try:
+            var["scores"], var["mrnapos"] = cls.get_spliceai(var["genomic"], cls.grch)
             var["location"] = cls.get_location(var["lookup"]["Transcript"], var["pos"])
-        except Exception as e:
-            print(e)
-            return var
-        
-        try:
             var["prediction"] = cls.get_predictions(var)
+        
         except Exception as e:
             print(e)
-            return var
     
         return var
             
