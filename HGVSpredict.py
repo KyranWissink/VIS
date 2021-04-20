@@ -23,7 +23,7 @@ Output: A .csv file with predictions of the effects of the mutations
 ####################################
 
 import sys, os
-import spliceaifriendly as hf
+import HGVSfunctions as hf
 import pandas as pd
 import argparse
 
