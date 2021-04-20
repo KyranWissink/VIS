@@ -655,7 +655,7 @@ class Predicter():
     
     ##########################################################################
     #                           PREDICTION METHODS                           #
-    ##########################################################################   
+    ##########################################################################
     
     @classmethod
     def get_predictions(cls, var):
@@ -693,7 +693,92 @@ class Predicter():
         return predictions
     
     
+    
+    @classmethod
+    def predict(cls, var, threshold):
+        """
+        Function
+        --------
+        Tries to predict a variants effect based on the SPLICEAI delta scores,
+        the location of the variant and the position to start and end of the 
+        location. 
 
+        Parameters
+        ----------
+        var : variant dict.
+        threshold : SPLICEAI delta score cut-off.
+
+        Returns
+        -------
+        prediction : The final prediction of the variant/cut-off combination.
+
+        """
+            
+        # Make it a bit simpler to work with
+        acc_gain = var["scores"]["acceptor_gain"]
+        acc_loss = var["scores"]["acceptor_loss"]
+        don_gain = var["scores"]["donor_gain"]
+        don_loss = var["scores"]["donor_loss"]
+        
+        
+        
+        # Acceptor gain
+        if acc_gain >= threshold:
+            
+            # Acceptor gain alone
+            if acc_loss < threshold and don_gain < threshold and don_loss < threshold:
+                prediction = cls.gain(var, "acceptor")
+                
+            # Acceptor gain + loss
+            if don_gain < threshold and don_loss < threshold:
+                prediction = cls.gain_loss(var, "acceptor")
+            
+            # Acceptor gain + loss + donor loss/gain
+            else:
+                prediction = "complex"
+                        
+                
+                
+        # Acceptor loss
+        elif acc_loss >= threshold:
+            
+            # Acceptor loss alone
+            if don_gain <= threshold and don_loss <= threshold:
+                
+                prediction = cls.loss(var, "acceptor")
+
+            # Acceptor loss + donor loss
+            elif don_loss >= threshold and don_gain <= threshold:
+                prediction = cls.loss_loss(var)
+
+            # Acceptor loss + donor loss + donor gain
+            else:
+                prediction = "complex"
+    
+    
+    
+        # Donor gain
+        elif don_gain >= threshold:
+            
+            # Donor gain alone
+            if don_loss < threshold:
+                prediction = cls.gain(var, "donor")
+                
+            # Donor gain + loss
+            else:
+                prediction = cls.gain_loss(var, "donor")
+            
+                
+        # Donor loss
+        elif don_loss >= threshold:
+            
+            # Donor loss alone
+            prediction = cls.loss(var, "donor")
+        
+        return prediction
+    
+    
+    
     @staticmethod
     def gain(var, site):
         """
@@ -871,94 +956,4 @@ class Predicter():
             prediction = "Exon " + str(var["location"]["number"]) + " skip" 
             
         return prediction
-    
-    
-    
-    @classmethod
-    def predict(cls, var, threshold):
-        """
-        Function
-        --------
-        Tries to predict a variants effect based on the SPLICEAI delta scores,
-        the location of the variant and the position to start and end of the 
-        location. 
-
-        Parameters
-        ----------
-        var : variant dict.
-        threshold : SPLICEAI delta score cut-off.
-
-        Returns
-        -------
-        prediction : The final prediction of the variant/cut-off combination.
-
-        """
-            
-        # Make it a bit simpler to work with
-        acc_gain = var["scores"]["acceptor_gain"]
-        acc_loss = var["scores"]["acceptor_loss"]
-        don_gain = var["scores"]["donor_gain"]
-        don_loss = var["scores"]["donor_loss"]
-        
-        
-        
-        # Acceptor gain
-        if acc_gain >= threshold:
-            
-            # Acceptor gain alone
-            if acc_loss < threshold and don_gain < threshold and don_loss < threshold:
-                prediction = cls.gain(var, "acceptor")
-                
-            # Acceptor gain + loss
-            if don_gain < threshold and don_loss < threshold:
-                prediction = cls.gain_loss(var, "acceptor")
-            
-            # Acceptor gain + loss + donor loss/gain
-            else:
-                prediction = "complex"
-                        
-                
-                
-        # Acceptor loss
-        elif acc_loss >= threshold:
-            
-            # Acceptor loss alone
-            if don_gain <= threshold and don_loss <= threshold:
-                
-                prediction = cls.loss(var, "acceptor")
-
-            # Acceptor loss + donor loss
-            elif don_loss >= threshold and don_gain <= threshold:
-                prediction = cls.loss_loss(var)
-
-            # Acceptor loss + donor loss + donor gain
-            else:
-                prediction = "complex"
-    
-    
-    
-        # Donor gain
-        elif don_gain >= threshold:
-            
-            # Donor gain alone
-            if don_loss < threshold:
-                prediction = cls.gain(var, "donor")
-                
-            # Donor gain + loss
-            else:
-                prediction = cls.gain_loss(var, "donor")
-            
-                
-        # Donor loss
-        elif don_loss >= threshold:
-            
-            # Donor loss alone
-            prediction = cls.loss(var, "donor")
-        
-        
-        
-        return prediction
-        
-        
-    
     
