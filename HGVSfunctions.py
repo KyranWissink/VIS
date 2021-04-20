@@ -475,6 +475,23 @@ class Predicter():
 
     @staticmethod
     def get_spliceai(var_g, grch):
+        """
+        Function
+        --------
+        Gets the SpliceAI scores and positions for the current variant.
+        Uses the SpliceAI API.
+        
+        Parameters
+        ----------
+        var_g : genomic variant.
+        grch : genome version.
+
+        Returns
+        -------
+        scores : SpliceAI delta scores (acceptor gain, loss, etc.)
+        mrnapos : pre-mRNA positions of the delta scores.
+
+        """
         
         # Define the url
         if "37" in grch:
@@ -487,7 +504,8 @@ class Predicter():
         
         # Pull data from API and format it into a list
         r = requests.get(url, timeout=30)
-            
+         
+        # Try twice in case the API does not respond
         if not r.ok:
             print("SpliceAI did not respond. Trying again in 10 seconds.")
             time.sleep(10)
