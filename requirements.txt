@@ -1,4 +1,4 @@
-hgvs
-pyfaidx
-pyensemblrest
-pandas
+hgvs>=1.5.1
+pyfaidx>=0.5.9.5
+pyensemblrest>=0.2.3
+pandas>=1.2.3
