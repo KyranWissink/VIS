@@ -66,7 +66,7 @@ def check_arg(arg):
     
 if __name__ == '__main__':
     
-    print("\nStarting " + sys.argv[0] + ".")
+    print("\nStarting %s." % sys.argv[0])
     print("Initialising programme...")
 
 
@@ -85,12 +85,22 @@ if __name__ == '__main__':
     
     # Validate if preferred transcripts are supplied
     if args.pref_tr:
-        hf.validate_variants(content, args.pref_tr)
+        try:
+            hf.validate_variants(content, args.pref_tr)
+        except Exception as e:
+            print("An error occurred while validating the variants with the"\
+                  + "preferred transcripts:")
+            print(e)
+            print("Continuing without preferred transcripts.")
     
     
     # Initialise genome and content
-    hf.Predicter.grch = args.genome
-    content = hf.Predicter.initialise(content)
+    try:
+        hf.Predicter.grch = args.genome
+        content = hf.Predicter.initialise(content)
+    except Exception as e:
+        print(e)
+        sys.exit()
     
     print("Initialisation complete.\n")
     print("Running variants...")
@@ -100,7 +110,7 @@ if __name__ == '__main__':
     
     # Run every variant
     for variant in content:
-        print("Working on: " + variant + ".")
+        print("Working on: %s." % variant)
         try:
             output = hf.Predicter.run(variant) # Predict
             output = hf.clean(output) # Do not include everything from the class
@@ -108,7 +118,6 @@ if __name__ == '__main__':
 
         except Exception:
             print("variant skipped: %s." % variant)
-            output["prediction"] = "ERROR"
             pass
     
     # Convert results to pandas dataframe
@@ -121,10 +130,11 @@ if __name__ == '__main__':
     except PermissionError:
         raise PermissionError("Unable to open the output file.\n" + 
                               "File is likely open in another programme.")
-        sys.exit()
     
     
     # Finalise and exit
-    print("\nSuccessfully processed " + str(len(write)) + " out of " + str(len(content)) + " variants.")
-    print("Results can be found at " + os.path.abspath(os.getcwd()) + "/" + args.output)
+    print("\nSuccessfully processed %s out of %s variants." \
+          %(str(len(write)), str(len(content))))
+    print("Results can be found at %s/%s" \
+          %(os.path.abspath(os.getcwd()), args.output))
 

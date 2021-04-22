@@ -88,6 +88,9 @@ def clean(var):
     output["20-50%"] = var["prediction"][0.2]
     output["5-20%"] = var["prediction"][0.05]
     
+    if "warn" in var:
+        output["Warning"] = var["warn"]
+    
     return output
 
 
@@ -99,7 +102,7 @@ class Predicter:
     ########################################################################## 
     
     @staticmethod
-    def get_genome(grch):
+    def get_genome(genome_annotation):
         """
         Parameters
         ----------
@@ -117,17 +120,18 @@ class Predicter:
 
         """
         
-        if '19' in grch or '37' in grch:
+        if '19' in genome_annotation or '37' in genome_annotation:
+            genome = Fasta(genome_annotation)
             grch = "GRCh37"
-            genome = Fasta('input/hg19.fa')
             
-        elif '38' in grch:
+        elif '38' in genome_annotation:
+            genome = Fasta(genome_annotation)
             grch = "GRCh38"
-            genome = Fasta('input/hg38.fa')
-            
+        
         else:
-            raise RuntimeError("Invalid genome: " + grch + ".")
-            
+            raise RuntimeError("Unkown genome version. Only hg19 and hg38 " + \
+                               "are supported.")
+                
         return genome, grch
     
     
@@ -328,7 +332,7 @@ class Predicter:
         else:
             var["pos"], ref, alt = cls.snv_genomic(var)
             
-        var["genomic"] = var["chrom"] + "-" + var["pos"] + "-" + ref + "-" + alt
+        var["genomic"] = "%s-%s-%s-%s" %(var["chrom"], var["pos"], ref, alt)
             
         return var
     
@@ -553,11 +557,11 @@ class Predicter:
             else:
                 location_counter[location['number']] += 1
                 
-        # Use most common location
+        # Use longest transcript; warn if there are alternative transcripts
         try:
             location_number = max(location_counter, key = location_counter.get)
         except ValueError:
-            raise RuntimeError("Location not found for ")
+            raise RuntimeError("Location not found." )
         location = next(item for item in location_list if item["number"] == location_number)
         
         return location
