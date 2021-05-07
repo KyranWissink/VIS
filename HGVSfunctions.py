@@ -26,12 +26,20 @@ ensRest = EnsemblRest()
 #                                  METHODS                               #
 ##########################################################################
 
-def validate_variants(content):
+
+def validate_variants(content, pref_tr):
     """
+    Function
+    --------
+    Validates the transcripts by using the preferred HGVS transcript 
+    variant if supplied. 
+    
+    This method is only called when the user inputs a preferred transcript
+    file in the command line options.
+    
     Parameters
     ----------
-    content : List of all variants in hgvs format, parsed from the user 
-            input .txt file in the command line options.
+    content : List of all variants in hgvs format.
 
     Returns
     -------
@@ -40,14 +48,26 @@ def validate_variants(content):
 
     """
 
-    with open ("input/preferred_transcript.txt") as ifs:
+    with open (pref_tr) as ifs:
         preferred = ifs.readlines()
     preferred = [variant.strip() for variant in preferred]
     
     # Verify transcripts
     for index in range(0,len(content)):
+        
+        # Handle spaces
+        if " " in content[index]:
+            content[index].replace(" ", "")
+            
         match = re.search("(\w+)\.\d+(.*)", content[index])
-        nm = match.group(1)
+        
+        if type(match) == re.Match:
+            nm = str(match.group(1))
+            
+        else: # No version number in original NM
+            match = re.search("(\w+)(\:.*)", content[index])
+            nm = str(match.group(1)) + ".1"
+
         rest = match.group(2)
         transcript = [x for x in preferred if nm in x]
         if len(transcript) == 1:
@@ -135,48 +155,6 @@ class Predicter:
         return genome, grch
     
     
-    
-    @staticmethod
-    def validate_variants(content, pref_tr):
-        """
-        Function
-        --------
-        Validates the transcripts by using the preferred HGVS transcript 
-        variant if supplied. 
-        
-        This method is only called when the user inputs a preferred transcript
-        file in the command line options.
-        
-        Parameters
-        ----------
-        content : List of all variants in hgvs format.
-
-        Returns
-        -------
-        content : List of all variants in hgvs format, now validated with 
-                the preferred transcripts.
-
-        """
-
-        with open (pref_tr) as ifs:
-            preferred = ifs.readlines()
-        preferred = [variant.strip() for variant in preferred]
-        
-        # Verify transcripts
-        for index in range(0,len(content)):
-            match = re.search("(\w+)\.\d+(.*)", content[index])
-            nm = match.group(1)
-            rest = match.group(2)
-            transcript = [x for x in preferred if nm in x]
-            if len(transcript) == 1:
-                transcript = transcript[0]
-                content[index] = transcript + rest
-            else:
-                transcript = content[index]
-                
-        return content
-    
-    
 
     @classmethod
     def get_hgvs_assembly(cls):
@@ -209,6 +187,11 @@ class Predicter:
         
         cls.genome, cls.grch = cls.get_genome(cls.grch)
         cls.get_hgvs_assembly()
+        
+        # Handle spaces
+        for index in range(0,len(content)):
+            if " " in content[index]:
+                content[index] = content[index].replace(" ", "")
         
         return content
         
@@ -430,10 +413,18 @@ class Predicter:
                 
             except he.HGVSDataNotAvailableError:
                 match = re.search("(^\w+\.\d+)(.*)", var["hgvs"])
-                NM = str(match.group(1))
-                newversion = int(NM[-1]) + 1
-                NM = NM[0:-1] + str(newversion)[-1]
-                var["hgvs"] = NM + str(match.group(2))
+                if type(match) == re.Match:
+                    NM = str(match.group(1))
+                    newversion = int(NM[-1]) + 1
+                    NM = NM[0:-1] + str(newversion)[-1] 
+                    var["hgvs"] = NM + str(match.group(2))
+                else: # No version number in original NM
+                    version = '.1'
+                    match = re.search("(^\w+)(\:.*)", var["hgvs"])
+                    NM = str(match.group(1))
+                    cdna = str(match.group(2))
+                    var["hgvs"] = NM + version + cdna
+                
                 var["warn"] = "HGVS error: genomic variant conversion was manually performed"
                 continue
             break
